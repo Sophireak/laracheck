@@ -1,0 +1,40 @@
+#!/bin/sh
+# LaraCheck — Pre-Push Hook
+# Managed by sophireak/laracheck
+# Activated with: git config core.hooksPath .githooks
+
+PHP=$(command -v php || echo "php")
+
+if [ ! -f "artisan" ]; then
+  echo "⚠  Not a Laravel project root. Skipping."
+  exit 0
+fi
+
+# Read mode from config (default: soft)
+MODE=$(php -r "
+  define('LARAVEL_START', microtime(true));
+  require 'vendor/autoload.php';
+  \$app = require 'bootstrap/app.php';
+  \$app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
+  echo config('laracheck.mode', 'soft');
+" 2>/dev/null)
+
+echo ""
+
+if [ "$MODE" = "strict" ]; then
+  $PHP artisan laracheck --strict
+else
+  $PHP artisan laracheck
+fi
+
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "  Push blocked. Fix the issues above."
+  echo "  Bypass: git push --no-verify"
+  echo ""
+  exit 1
+fi
+
+exit 0
