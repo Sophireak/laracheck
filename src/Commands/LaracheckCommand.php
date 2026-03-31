@@ -97,9 +97,22 @@ class LaracheckCommand extends Command
         }
 
         $branch    = trim(shell_exec('git rev-parse --abbrev-ref HEAD 2>&1') ?? '');
-        $protected = config('laracheck.protected_branches', ['main', 'master']);
+        $protected = config('laracheck.protected_branches', ['main', 'master', 'develop']);
+
         if (in_array($branch, $protected)) {
-            $this->allWarnings[] = "Pushing directly to '{$branch}' — consider a feature branch";
+            $this->allIssues[] = implode("\n", [
+                "You are pushing directly to '{$branch}' — this is not allowed.",
+                "  Create a feature branch first:",
+                "    git checkout -b feature/your-task-name",
+                "  Push to your branch:",
+                "    git push origin feature/your-task-name",
+                "  Then open a Pull Request → {$branch}",
+            ]);
+        } else {
+            // Warn if branch name doesn't follow convention
+            if (! preg_match('/^(feature|fix|hotfix|chore)\//', $branch)) {
+                $this->allWarnings[] = "Branch '{$branch}' doesn't follow naming convention. Use: feature/name, fix/name, hotfix/name";
+            }
         }
     }
 

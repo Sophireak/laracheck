@@ -25,7 +25,7 @@ return [
     |--------------------------------------------------------------------------
     | Pushing directly to these branches triggers a warning.
     */
-    'protected_branches' => ['main', 'master'],
+    'protected_branches' => ['main', 'master', 'develop'],
 
     /*
     |--------------------------------------------------------------------------
