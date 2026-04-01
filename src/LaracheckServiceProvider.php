@@ -5,6 +5,7 @@ namespace Sophireak\Laracheck;
 use Illuminate\Support\ServiceProvider;
 use Sophireak\Laracheck\Commands\LaracheckCommand;
 use Sophireak\Laracheck\Commands\InstallCommand;
+use Sophireak\Laracheck\Commands\BranchCommand;
 
 class LaracheckServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,7 @@ class LaracheckServiceProvider extends ServiceProvider
             $this->commands([
                 LaracheckCommand::class,
                 InstallCommand::class,
+                BranchCommand::class,
             ]);
 
             $this->publishes([

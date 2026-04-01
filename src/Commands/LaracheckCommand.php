@@ -92,7 +92,8 @@ class LaracheckCommand extends Command
     {
         $status = trim(shell_exec('git status --short 2>&1') ?? '');
         if (! empty($status)) {
-            $count = count(array_filter(explode("\n", $status)));
+            $count = count(array_filter(explode("
+", $status)));
             $this->allWarnings[] = "{$count} uncommitted file(s) — were these intentional?";
         }
 
@@ -100,19 +101,11 @@ class LaracheckCommand extends Command
         $protected = config('laracheck.protected_branches', ['main', 'master', 'develop']);
 
         if (in_array($branch, $protected)) {
-            $this->allIssues[] = implode("\n", [
-                "You are pushing directly to '{$branch}' — this is not allowed.",
-                "  Create a feature branch first:",
-                "    git checkout -b feature/your-task-name",
-                "  Push to your branch:",
-                "    git push origin feature/your-task-name",
-                "  Then open a Pull Request → {$branch}",
-            ]);
-        } else {
-            // Warn if branch name doesn't follow convention
-            if (! preg_match('/^(feature|fix|hotfix|chore)\//', $branch)) {
-                $this->allWarnings[] = "Branch '{$branch}' doesn't follow naming convention. Use: feature/name, fix/name, hotfix/name";
-            }
+            $this->allIssues[] = "Direct push to \'{$branch}\' is not allowed. "
+                . "Run: php artisan laracheck:branch";
+        } elseif (! preg_match('/^(feature|fix|hotfix|chore)\//', $branch)) {
+            $this->allWarnings[] = "Branch \'{$branch}\' doesn\'t follow naming convention. "
+                . "Use feature/name, fix/name etc. Tip: php artisan laracheck:branch";
         }
     }
 
