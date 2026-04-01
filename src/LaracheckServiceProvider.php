@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Sophireak\Laracheck\Commands\LaracheckCommand;
 use Sophireak\Laracheck\Commands\InstallCommand;
 use Sophireak\Laracheck\Commands\BranchCommand;
+use Sophireak\Laracheck\Commands\CommitCommand;
 
 class LaracheckServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,7 @@ class LaracheckServiceProvider extends ServiceProvider
                 LaracheckCommand::class,
                 InstallCommand::class,
                 BranchCommand::class,
+                CommitCommand::class,
             ]);
 
             $this->publishes([
