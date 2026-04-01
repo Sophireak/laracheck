@@ -93,10 +93,12 @@ class CommitCommand extends Command
 
         $this->newLine();
 
-        if (str_contains($output ?? '', 'master')
+        if (
+            str_contains($output ?? '', 'master')
             || str_contains($output ?? '', 'main')
             || str_contains($output ?? '', 'feat')
-            || str_contains($output ?? '', 'fix')) {
+            || str_contains($output ?? '', 'fix')
+        ) {
             $this->line('  <fg=green;options=bold>✔ Committed!</>');
             $this->line("  <fg=gray>{$message}</>");
         } else {
@@ -145,10 +147,18 @@ class CommitCommand extends Command
             CURLOPT_POSTFIELDS => $payload,
         ]);
 
-        $res  = json_decode(curl_exec($ch), true);
+        $res  = curl_exec($ch);
+        $err  = curl_error($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        $text = trim($res['content'][0]['text'] ?? '');
+        // DEBUG — shows exactly what's happening
+        $this->line("  <fg=gray>HTTP: {$code}</>");
+        $this->line("  <fg=gray>Curl error: " . ($err ?: 'none') . "</>");
+        $this->line("  <fg=gray>Response: " . mb_substr($res ?? '', 0, 300) . "</>");
+
+        $data = json_decode($res, true);
+        $text = trim($data['content'][0]['text'] ?? '');
 
         return ! empty($text) ? $text : null;
     }
