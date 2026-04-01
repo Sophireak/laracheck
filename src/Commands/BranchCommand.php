@@ -84,15 +84,22 @@ class BranchCommand extends Command
             if ($this->confirm('  Switch to it instead?', true)) {
                 shell_exec("git checkout {$branchName} 2>&1");
                 $this->line("  <fg=green>✔</> Switched to <fg=cyan>{$branchName}</>");
+
+                // Push existing branch to GitHub
+                $this->pushToGitHub($branchName);
             }
 
             $this->newLine();
             return 0;
         }
 
-        // Success
+        // Auto-push to GitHub so it's visible immediately
         $this->newLine();
-        $this->line("  <fg=green;options=bold>✔ Ready! You are now on:</> <fg=cyan>{$branchName}</>");
+        $this->line("  <fg=green;options=bold>✔ Branch created:</> <fg=cyan>{$branchName}</>");
+        $this->newLine();
+        $this->pushToGitHub($branchName);
+
+        // Final instructions
         $this->newLine();
         $this->line('  <fg=gray>Work freely — commit as much as you want on this branch.</>');
         $this->newLine();
@@ -107,6 +114,22 @@ class BranchCommand extends Command
         return 0;
     }
 
+    // ── Push branch to GitHub immediately ────────────────────────────────────
+    private function pushToGitHub(string $branchName): void
+    {
+        $this->line("  <fg=cyan>→</> Pushing branch to GitHub...");
+        $output = shell_exec("git push origin {$branchName} 2>&1");
+
+        if (str_contains($output ?? '', 'error') || str_contains($output ?? '', 'fatal')) {
+            $this->line("  <fg=yellow>⚠</> Could not push to GitHub automatically.");
+            $this->line("    Run manually: <fg=cyan>git push origin {$branchName}</>");
+        } else {
+            $this->line("  <fg=green>✔</> Branch is now visible on GitHub</>");
+            $this->line("  <fg=gray>github.com → your repo → branches → {$branchName}</>");
+        }
+    }
+
+    // ── Ask for task name, validate and slugify ───────────────────────────────
     private function askTaskName(): string
     {
         while (true) {
@@ -131,6 +154,7 @@ class BranchCommand extends Command
         }
     }
 
+    // ── Switch to develop, create it if it doesn't exist ─────────────────────
     private function switchToDevelop(): void
     {
         $branches = shell_exec('git branch -a 2>&1') ?? '';
